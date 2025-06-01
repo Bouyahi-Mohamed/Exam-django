@@ -185,9 +185,7 @@ gunicorn mobile_app.wsgi:application
 4. Ensure tests pass and coverage is maintained
 5. Submit a Pull Request
 
-## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
