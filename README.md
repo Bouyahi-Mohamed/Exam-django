@@ -6,36 +6,41 @@ This project consists of a Django REST API backend and a Kivy mobile client fron
 
 ### Backend (Django REST API & GraphQL)
 - User authentication with JWT tokens
-- Product management with image handling
-- Shopping cart functionality
-- Order management
-- Review system
-- AI-powered product generation (using OpenAI)
+- Product management with secure image handling
+- Shopping cart functionality with real-time updates
+- Order management system
+- Review and rating system
+- AI-powered product generation and descriptions (using OpenAI)
 - Secure file upload with MIME type validation
 - GraphQL API for flexible data querying
 - REST API endpoints for mobile client
+- Celery task queue for background processing
+- Redis caching for improved performance
+- Comprehensive test coverage with pytest
 
 ### Mobile Client (Kivy)
-- Modern Material Design UI
-- User authentication
-- Product browsing with image display
+- Modern Material Design UI with KivyMD
+- Secure user authentication
+- Product browsing with image caching
 - Shopping cart management
-- Product reviews
-- Search functionality with AI-powered product generation
+- Product reviews and ratings
+- Search functionality with AI suggestions
 - Responsive layout with card-based design
+- Offline support for basic functionality
 
 ## Prerequisites
 
 - Python 3.12+
-- Redis (for Celery task queue)
-- OpenAI API key (for AI product generation)
+- Redis (for Celery task queue and caching)
+- OpenAI API key (for AI features)
 - Virtual environment (recommended)
+- For Windows users: Microsoft Visual C++ Build Tools
 
 ## Installation
 
 1. Clone the repository:
-```bash or cmd
-git clone <repository-url>
+```bash
+git clone https://github.com/Bouyahi-Mohamed/Exam-django.git
 cd <project-directory>
 ```
 
@@ -51,15 +56,17 @@ pip install -r requirements.txt
 
 4. Set up environment variables:
 Create a `.env` file in the project root with:
-```
-SECRET_KEY=your_django_secret_key
+```env
+DJANGO_SECRET_KEY=your_django_secret_key
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 OPENAI_API_KEY=your_openai_api_key
+REDIS_URL=redis://localhost:6379/0
 ```
 
 5. Initialize the database:
 ```bash
+python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 ```
@@ -67,6 +74,7 @@ python manage.py createsuperuser
 ## Running the Application
 
 ### Backend Server
+
 1. Start Redis server:
 ```bash
 redis-server
@@ -74,15 +82,21 @@ redis-server
 
 2. Start Celery worker:
 ```bash
-celery -A project worker -l info
+celery -A mobile_app worker -l info
 ```
 
-3. Run Django development server:
+3. Start Celery beat (for scheduled tasks):
+```bash
+celery -A mobile_app beat -l info
+```
+
+4. Run Django development server:
 ```bash
 python manage.py runserver
 ```
 
 ### Mobile Client
+
 1. Navigate to the mobile client directory:
 ```bash
 cd mobile_client
@@ -93,135 +107,30 @@ cd mobile_client
 python main.py
 ```
 
-## API Documentation
-
-### GraphQL API
-Access the GraphQL playground at `/graphql/` when the server is running.
-
-#### Example Queries:
-```graphql
-# Get all products with reviews
-query {
-  products {
-    id
-    name
-    price
-    description
-    imageUrl
-    averageRating
-    reviews {
-      rating
-      comment
-      user {
-        username
-      }
-    }
-  }
-}
-
-# Create a new product (admin only)
-mutation {
-  createProduct(input: {
-    name: "New Product"
-    price: 99.99
-    description: "Product description"
-    stock: 10
-  }) {
-    product {
-      id
-      name
-      price
-    }
-  }
-}
-
-# Add product review
-mutation {
-  createReview(input: {
-    productId: 1
-    rating: 5
-    comment: "Great product!"
-  }) {
-    review {
-      id
-      rating
-      comment
-    }
-  }
-}
-
-# Add to cart
-mutation {
-  addToCart(input: {
-    productId: 1
-    quantity: 2
-  }) {
-    cart {
-      total
-      items {
-        product {
-          name
-        }
-        quantity
-      }
-    }
-  }
-}
-```
-
-### REST API Endpoints
-
-#### Authentication
-- POST `/api/v1/users/register/`: Register new user
-- POST `/api/v1/users/login/`: Login user
-
-#### Products
-- GET `/api/v1/products/`: List all products
-- POST `/api/v1/products/`: Create new product
-- GET `/api/v1/products/{id}/`: Get product details
-- PUT `/api/v1/products/{id}/`: Update product
-- DELETE `/api/v1/products/{id}/`: Delete product
-- POST `/api/v1/products/{id}/review/`: Add product review
-- GET `/api/v1/products/search/`: Search products
-
-#### Cart
-- GET `/api/v1/carts/`: Get user's cart
-- POST `/api/v1/carts/{id}/add_item/`: Add item to cart
-- POST `/api/v1/carts/{id}/remove_item/`: Remove item from cart
-- POST `/api/v1/carts/{id}/update_item/`: Update cart item
-- POST `/api/v1/carts/{id}/checkout/`: Checkout cart
-
-## Mobile Client Features
-
-### User Interface
-- Material Design components
-- Responsive card layout
-- Image handling with placeholders
-- Search functionality
-- Shopping cart management
-- Product reviews
-
-### Authentication
-- User registration
-- Login/logout functionality
-- Token-based authentication
-
 ## Development
 
-### Backend Development
-- Django REST framework for API
-- GraphQL with Graphene-Django
-- JWT authentication
-- Celery for asynchronous tasks
-- OpenAI integration for product generation
-- Secure file handling with python-magic
+### Setting Up Development Environment
 
-### Mobile Client Development
-- KivyMD for Material Design
-- Asynchronous image loading
-- State management
-- Error handling
-- User feedback with toast messages
+1. Install development dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Install pre-commit hooks:
+```bash
+pre-commit install
+```
+
+3. Run tests:
+```bash
+pytest --cov=.
+```
+
+### Code Style
+
+- Follow PEP 8 guidelines
+- Use Black for code formatting
+- Run flake8 for linting
 
 ## Security Features
 
@@ -232,15 +141,58 @@ mutation {
 - Error handling and validation
 - CORS configuration
 - GraphQL query depth limiting
+- Rate limiting
+- File upload restrictions
+
+## API Documentation
+
+### REST API Documentation
+Access the Swagger UI documentation at `/api/docs/` when the server is running.
+
+### GraphQL API
+Access the GraphQL playground at `/graphql/` when the server is running.
+
+For detailed API documentation and examples, see [API_DOCS.md](API_DOCS.md)
+
+## Deployment
+
+### Production Settings
+
+1. Update `.env` file with production settings:
+```env
+DEBUG=False
+ALLOWED_HOSTS=your-domain.com
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+```
+
+2. Set up static files:
+```bash
+python manage.py collectstatic
+```
+
+3. Use gunicorn for production:
+```bash
+gunicorn mobile_app.wsgi:application
+```
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+3. Write tests for new features
+4. Ensure tests pass and coverage is maintained
+5. Submit a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details. 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Django REST Framework
+- Kivy and KivyMD
+- OpenAI
+- GraphQL
+- All other open-source contributors 
