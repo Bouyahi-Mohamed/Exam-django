@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+python-jose = "*"
+pyjwt = "*"
+cryptography = "*"
+djangorestframework-simplejwt = "*"
+numpy = "*"
+langchain = "*"
+langchain-community = "*"
+plyer = "*"
+pillow = "*"
+redis = "==5.0.1"
+celery = "*"
+kivymd = "*"
+kivy = "*"
+openai = "*"
+django = "*"
+djangorestframework = "*"
+django-cors-headers = "*"
+graphene-django = "*"
+django-graphql-jwt = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
