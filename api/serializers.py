@@ -74,21 +74,21 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'description', 'price', 'stock', 'image_url', 
-                 'absolute_image_url', 'average_rating', 'reviews', 'is_ai_generated']
+        fields = [
+            'id', 'name', 'description', 'price', 'stock', 'image',
+            'image_url', 'absolute_image_url', 'average_rating', 'reviews', 'is_ai_generated'
+        ]
         extra_kwargs = {
             'image': {'write_only': True, 'required': False}
         }
 
     def get_image_url(self, obj):
-        """Return the relative URL of the image"""
-        return obj.image_url if obj.image else ""
+        return obj.image.url if obj.image else ""
 
     def get_absolute_image_url(self, obj):
-        """Return the absolute URL of the image"""
         request = self.context.get('request')
         if obj.image and request:
-            return request.build_absolute_uri(obj.image_url)
+            return request.build_absolute_uri(obj.image.url)
         return ""
 
     def get_average_rating(self, obj):
@@ -134,4 +134,4 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ('id', 'items', 'total', 'created_at', 'updated_at') 
+        fields = ('id', 'items', 'total', 'created_at', 'updated_at')

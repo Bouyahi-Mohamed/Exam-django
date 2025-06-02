@@ -198,16 +198,6 @@ pytest --cov=.
 - Rate limiting
 - File upload restrictions
 
-## API Documentation
-
-### REST API Documentation
-Access the Swagger UI documentation at `/api/docs/` when the server is running.
-
-### GraphQL API
-Access the GraphQL playground at `/graphql/` when the server is running.
-
-For detailed API documentation and examples, see [API_DOCS.md](API_DOCS.md)
-
 ## Deployment
 
 ### Production Settings

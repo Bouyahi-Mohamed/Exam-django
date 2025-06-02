@@ -121,8 +121,8 @@ class GestureDataViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser, JSONParser]
+    permission_classes = [IsAuthenticated]
     
     def get_serializer_context(self):
         """Add request to serializer context"""
@@ -201,55 +201,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(response_data)
     
     def create(self, request, *args, **kwargs):
-        """Handle both multipart form data and JSON requests"""
-        # Convert form data to dict if needed
-        data = request.data.copy()
-        if not isinstance(data, dict):
-            data = data.dict()
-
-        # Set default values if not provided
-        if 'price' not in data:
-            data['price'] = '0.00'
-        if 'stock' not in data:
-            data['stock'] = 0
-        if 'description' not in data:
-            data['description'] = ''
-
-        # Handle image upload
-        if 'image' in request.FILES:
-            image_file = request.FILES['image']
-            # Validate file type
-            mime_type = get_mime_type(image_file)
-            if not mime_type:
-                return Response(
-                    {'error': 'Image corrompue ou invalide'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            
-            allowed_types = ['image/jpeg', 'image/png', 'image/gif']
-            if mime_type not in allowed_types:
-                return Response(
-                    {'error': 'Type de fichier non autorisé'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-            data['image'] = image_file
-
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(data=request.data)  # <-- CORRECT
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-
-        # Build absolute URL for image if present
-        response_data = serializer.data
-        if 'image_url' in response_data and response_data['image_url']:
-            if request.is_secure():
-                protocol = 'https'
-            else:
-                protocol = 'http'
-            host = request.get_host()
-            response_data['url'] = f"{protocol}://{host}{response_data['image_url']}"
-
-        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def destroy(self, request, *args, **kwargs):
         try:

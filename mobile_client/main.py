@@ -1606,3 +1606,35 @@ class ShopApp(MDApp):
 
 if __name__ == '__main__':
     ShopApp().run()
+
+import requests
+import os
+
+def create_product(form, user_token):
+    data = {
+        'name': form.name_input.text.strip(),
+        'description': form.description_input.text.strip(),
+        'price': form.price_input.text.strip(),
+        'stock': form.stock_input.text.strip(),
+    }
+    image_path = form.image_url_input.text.strip()
+    headers = {'Authorization': f'Bearer {user_token}'}
+
+    if image_path and os.path.isfile(image_path):
+        with open(image_path, 'rb') as img_file:
+            files = {'image': img_file}
+            response = requests.post(
+                "http://localhost:8000/api/v1/products/",
+                data=data,
+                files=files,
+                headers=headers
+            )
+    else:
+        response = requests.post(
+            "http://localhost:8000/api/v1/products/",
+            data=data,
+            headers=headers
+        )
+
+    print("Status:", response.status_code)
+    print("Response:", response.text)
