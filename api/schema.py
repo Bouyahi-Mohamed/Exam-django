@@ -12,7 +12,7 @@ class UserType(DjangoObjectType):
 class ProductType(DjangoObjectType):
     class Meta:
         model = Product
-        fields = ('id', 'name', 'description', 'price', 'stock', 'image_url', 'average_rating', 'reviews')
+        fields = ("id", "name", "description", "price", "stock", "image", "is_ai_generated")
 
 class OrderType(DjangoObjectType):
     class Meta:
@@ -33,7 +33,8 @@ class Query(graphene.ObjectType):
     # Product queries
     products = graphene.List(ProductType)
     product = graphene.Field(ProductType, id=graphene.Int(required=True))
-    
+    all_products = graphene.List(ProductType)
+
     # Order queries
     orders = graphene.List(OrderType)
     order = graphene.Field(OrderType, id=graphene.Int(required=True))
@@ -74,6 +75,9 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_product_reviews(self, info, product_id):
         return ProductReview.objects.filter(product_id=product_id)
+
+    def resolve_all_products(root, info):
+        return Product.objects.all()
 
 class CreateProductInput(graphene.InputObjectType):
     name = graphene.String(required=True)
@@ -162,4 +166,4 @@ class Mutation(graphene.ObjectType):
     create_review = CreateReview.Field()
     add_to_cart = AddToCart.Field()
 
-schema = graphene.Schema(query=Query, mutation=Mutation) 
+schema = graphene.Schema(query=Query, mutation=Mutation)

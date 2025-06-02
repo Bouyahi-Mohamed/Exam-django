@@ -20,11 +20,12 @@ from graphene_django.views import GraphQLView
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from django.conf.urls.static import static
+from api.schema import schema
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')),  # Include all API URLs
-    path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
+    path("graphql/", GraphQLView.as_view(graphiql=True, schema=schema)),
 ]
 
 # Ajouter les URLs des médias en mode développement
