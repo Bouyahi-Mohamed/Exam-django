@@ -1,28 +1,38 @@
 # Django and DRF
-django==5.0.2
+django==5.2.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
 django-cors-headers==4.3.1
 django-environ==0.11.2
+django-filter==23.5
+django-cleanup==8.0.0
 
 # GraphQL
 graphene-django==3.2.0
 django-graphql-jwt==0.4.0
-django-filter==23.5
+graphql-core==3.2.3
+graphene==3.3
+django-graphql-auth==0.3.16
+graphql-relay==3.2.0
 
 # Database and Caching
 psycopg2-binary==2.9.9
 redis==5.0.1
+dj-database-url==2.1.0
 
 # Celery
 celery==5.3.6
 flower==2.0.1
+django-celery-results==2.5.1
+django-celery-beat==2.5.0
 
 # API and OpenAI
 openai==1.12.0
 requests==2.31.0
 python-dotenv==1.0.0
 python-magic==0.4.27
+urllib3==2.2.0
+certifi==2024.2.2
 
 # Image Processing
 Pillow==10.2.0
@@ -31,10 +41,13 @@ Pillow==10.2.0
 kivy==2.3.1
 kivymd==1.2.0
 sdl2_ttf==2.0.15
+kivy-garden==0.1.5
 
 # Security
 python-magic-bin==0.4.14; platform_system == "Windows"
-django-cleanup==8.0.0
+cryptography==42.0.2
+bcrypt==4.1.2
+django-ratelimit==4.1.0
 
 # Development Tools
 black==23.11.0

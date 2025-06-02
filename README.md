@@ -28,6 +28,55 @@ This project consists of a Django REST API backend and a Kivy mobile client fron
 - Responsive layout with card-based design
 - Offline support for basic functionality
 
+## Project Structure
+```
+project/
+├── api/                            # Backend API application
+│   ├── migrations/                 # Database migrations
+│   ├── __init__.py
+│   ├── admin.py                   # Django admin configuration
+│   ├── apps.py                    # App configuration
+│   ├── models.py                  # Database models
+│   ├── serializers.py             # DRF serializers
+│   ├── schema.py                  # GraphQL schema
+│   ├── tasks.py                   # Celery tasks
+│   ├── tests.py                   # Unit tests
+│   ├── urls.py                    # API URL routing
+│   └── views.py                   # API views and viewsets
+│
+├── mobile_client/                  # Kivy mobile application
+│   ├── screens/                   # Application screens
+│   ├── widgets/                   # Custom UI widgets
+│   ├── utils/                     # Utility functions
+│   ├── __init__.py
+│   └── main.py                    # Main application entry
+│
+├── mobile_app/                     # Django project settings
+│   ├── __init__.py
+│   ├── asgi.py                    # ASGI configuration
+│   ├── celery.py                  # Celery configuration
+│   ├── settings.py                # Django settings
+│   ├── urls.py                    # Main URL routing
+│   └── wsgi.py                    # WSGI configuration
+│
+├── media/                         # User uploaded files
+│   └── products/                  # Product images
+│
+├── static/                        # Static files
+│   ├── css/
+│   ├── js/
+│   └── images/
+│
+├── templates/                     # HTML templates
+├── .env                          # Environment variables
+├── .gitignore                    # Git ignore rules
+├── LICENSE                       # Project license
+├── README.md                     # Project documentation
+├── manage.py                     # Django management script
+├── requirements.txt              # Python dependencies
+└── pytest.ini                    # Pytest configuration
+```
+
 ## Prerequisites
 
 - Python 3.12+
@@ -62,6 +111,9 @@ DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 OPENAI_API_KEY=your_openai_api_key
 REDIS_URL=redis://localhost:6379/0
+DATABASE_URL=sqlite:///db.sqlite3
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
 
 5. Initialize the database:
@@ -94,6 +146,8 @@ celery -A mobile_app beat -l info
 ```bash
 python manage.py runserver
 ```
+
+The server will be available at `http://127.0.0.1:8000`
 
 ### Mobile Client
 
