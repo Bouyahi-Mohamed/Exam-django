@@ -10,7 +10,7 @@ from .serializers import (
     ProductSerializer, OrderSerializer, CartSerializer, CartItemSerializer,
     ProductReviewSerializer
 )
-from .tasks import process_gesture_data, send_push_notification, generate_product_with_ai
+from .tasks import process_gesture_data, send_push_notification, generate_product_with_ai, demo_long_task
 from django.core.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from django.utils import timezone
@@ -206,6 +206,10 @@ class ProductViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        product = serializer.save()
+        demo_long_task.delay(product.id)  # Lancement asynchrone
 
     def destroy(self, request, *args, **kwargs):
         try:

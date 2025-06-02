@@ -1,5 +1,5 @@
 from celery import shared_task
-from .models import Product, DeviceToken
+from .models import Product, DeviceToken, GestureData
 import numpy as np
 from langchain_community.llms import OpenAI
 from langchain.prompts import PromptTemplate
@@ -9,6 +9,7 @@ from django.conf import settings
 from django.utils import timezone
 from decimal import Decimal
 import random
+import time
 
 @shared_task
 def generate_product_with_ai(search_query):
@@ -236,4 +237,11 @@ def notify_user_about_gesture(gesture_data_id):
     except GestureData.DoesNotExist:
         print(f"GestureData with id {gesture_data_id} not found")
     except Exception as e:
-        print(f"Error notifying user about gesture: {str(e)}") 
+        print(f"Error notifying user about gesture: {str(e)}")
+
+@shared_task
+def demo_long_task(product_id):
+    # Simule un traitement long
+    time.sleep(10)
+    print(f"Traitement asynchrone terminé pour le produit {product_id}")
+    return f"Produit {product_id} traité"
