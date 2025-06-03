@@ -1,69 +1,44 @@
-from celery import shared_task
-from .models import Product, DeviceToken, GestureData
-import numpy as np
-from langchain_community.llms import OpenAI
-from langchain.prompts import PromptTemplate
-import json
-import requests
+import openai
 from django.conf import settings
-from django.utils import timezone
-from decimal import Decimal
-import random
+from .models import Product
+from celery import shared_task
+import json
 import time
 
+openai_client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+
 @shared_task
-def generate_product_with_ai(search_query):
+def generate_product_with_ai(prompt="Génère un produit e-commerce réaliste au format JSON."):
     try:
-        # Initialize OpenAI
-        llm = OpenAI(api_key=settings.OPENAI_API_KEY)
-        
-        # Create prompt for product generation
-        prompt = PromptTemplate(
-            input_variables=["search_query"],
-            template="""
-            Generate a detailed product listing based on this search query: {search_query}
-            
-            Provide the response in the following JSON format:
-            {
-                "name": "Product name",
-                "description": "Detailed product description",
-                "price": "Suggested price in decimal format",
-                "stock": "Suggested initial stock number",
-                "image_prompt": "A detailed prompt to generate product image"
-            }
-            
-            Make the description engaging and detailed. Price should be realistic.
-            """
+        response = openai_client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Tu es un assistant qui génère des produits e-commerce réalistes au format JSON."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=300,
+            temperature=0.7,
         )
-        
-        # Generate product details
-        result = llm(prompt.format(search_query=search_query))
-        product_data = json.loads(result)
-        
-        # Generate image using DALL-E
-        image_url = generate_product_image(product_data['image_prompt'])
-        
-        # Create new product
+        data = json.loads(response.choices[0].message.content)
         product = Product.objects.create(
-            name=product_data['name'],
-            description=product_data['description'],
-            price=Decimal(product_data['price']),
-            stock=int(product_data['stock']),
-            image_url=image_url,
+            name=data["name"],
+            description=data.get("description", ""),
+            price=data.get("price", 10.0),
+            stock=data.get("stock", 10),
             is_ai_generated=True,
-            ai_source='OpenAI'
+            ai_source="openai-gpt-3.5-turbo"
         )
-        
-        return {
-            'id': product.id,
-            'name': product.name,
-            'description': product.description,
-            'price': str(product.price),
-            'image_url': product.image_url
-        }
-        
+        return product.id
+
+    except openai.OpenAIError as e:
+        # Gestion spécifique des erreurs OpenAI
+        if hasattr(e, 'status_code') and e.status_code == 429:
+            print("Erreur OpenAI : quota dépassé (429).")
+        else:
+            print(f"Erreur OpenAI : {e}")
+        return None
     except Exception as e:
-        print(f"Error generating product: {str(e)}")
+        print("Erreur parsing ou création produit IA :", e)
         return None
 
 def generate_product_image(prompt):

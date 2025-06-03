@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import MobileUser, DeviceToken, GestureData, Product, Order, ProductReview
+from .tasks import generate_product_with_ai
 
 @admin.register(MobileUser)
 class MobileUserAdmin(UserAdmin):
@@ -16,6 +17,11 @@ class DeviceTokenAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'token')
     ordering = ('-last_used',)
 
+@admin.action(description="Générer un produit IA")
+def generate_ai_product(modeladmin, request, queryset):
+    generate_product_with_ai.delay()
+    modeladmin.message_user(request, "Tâche IA lancée.")
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'price', 'stock', 'is_ai_generated', 'created_at')
@@ -23,6 +29,7 @@ class ProductAdmin(admin.ModelAdmin):
     search_fields = ('name', 'description')
     ordering = ('-created_at',)
     readonly_fields = ('created_at', 'updated_at')
+    actions = [generate_ai_product]
 
     def get_queryset(self, request):
         # Add select_related for better performance

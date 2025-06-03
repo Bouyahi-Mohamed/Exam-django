@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 import uuid
+import graphene
+from graphene_django.types import DjangoObjectType
 
 class MobileUser(AbstractUser):
     device_id = models.UUIDField(default=uuid.uuid4, editable=False)
@@ -144,3 +146,13 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity}x {self.product.name}"
+
+class CartType(DjangoObjectType):
+    total = graphene.Float()  # ou graphene.Decimal() si tu veux
+
+    class Meta:
+        model = Cart
+        fields = ("id", "items", "total", "created_at", "updated_at")
+
+    def resolve_total(self, info):
+        return self.total

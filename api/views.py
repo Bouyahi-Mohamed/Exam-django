@@ -396,6 +396,12 @@ class ProductViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(products, many=True)
         return Response(serializer.data)
 
+    @action(detail=False, methods=['post'], url_path='generate-ai')
+    def generate_ai_product(self, request):
+        prompt = request.data.get("prompt", "Génère un produit e-commerce réaliste au format JSON.")
+        task = generate_product_with_ai.delay(prompt)
+        return Response({"task_id": task.id}, status=status.HTTP_202_ACCEPTED)
+
 def get_mime_type(file_obj):
     """
     Détecte de manière fiable le type MIME d'un fichier uploadé.
